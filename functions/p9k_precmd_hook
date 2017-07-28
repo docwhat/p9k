@@ -1,2 +1,4 @@
-print -nP "%{$reset_color%}"
+# This MUST go first
 p9k_pipe_status=( "$pipestatus[@]" )
+
+print -nP "%{$reset_color%}"
