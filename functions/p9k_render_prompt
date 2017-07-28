@@ -40,6 +40,17 @@ for seg in "${(@)segments}"; do
   local name=${parts[1]}
   local fg=${parts[2]}
   bg=${parts[3]}
+  # local content
+
+  if (( $+functions[p9k_segment_${name}] )); then
+    content="$("p9k_segment_${name}" "$fg" "$bg")"
+  else
+    content=$name
+  fi
+
+  if [ -z "$content" ]; then
+    continue
+  fi
 
   if (( idx == 1 )); then
     if [ "$direction" = right ]; then
@@ -52,11 +63,7 @@ for seg in "${(@)segments}"; do
     e "%F{${fg}}%K{${bg}}"
   fi
 
-  if (( $+functions[p9k_segment_${name}] )); then
-    "p9k_segment_${name}" "$fg" "$bg"
-  else
-    e "$name"
-  fi
+  e "$content"
 
   last_bg=$bg
   idx+=1
