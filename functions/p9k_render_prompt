@@ -9,10 +9,10 @@ local -a segments=( "$@" )
 local separator
 case "$direction" in
   left )
-    separator=''
+    separator='%{%G%}'
     ;;
   right )
-    separator=''
+    separator='%{%G%}'
     ;;
   *)
     separator=' '
@@ -20,7 +20,11 @@ case "$direction" in
 esac
 
 sep() {
-  e " %F{${last_bg}}%K{${bg}}${separator} "
+  if [ "$last_bg" = "$bg" ]; then
+    e " %F{white}${separator} "
+  else
+    e " %F{${last_bg}}%K{${bg}}${separator} "
+  fi
 }
 
 local idx=1
@@ -37,6 +41,7 @@ for seg in "${(@)segments}"; do
     e ' '
   else
     sep
+    e "%F{${fg}}%K{${bg}}"
   fi
 
   if (( $+functions[p9k_segment_${name}] )); then

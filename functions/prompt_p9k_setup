@@ -3,7 +3,9 @@
 typeset -g -a p9k_last_pipe_status
 typeset -g -a p9k_left_segments=( dir::red::black status::yellow::red '%m%#'::white::blue )
 typeset -g -a p9k_right_segments=( '%y'::blue::white )
-typeset -g -a p9k_xtrace_segments
+typeset -g -a p9k_xtrace_segments=(
+'%s%b%u%{λ%}%L'::blue::236 '%N:%i'::008::235 '%(?.. %F{red}%?) %1(_.%F{yellow}%-1_ .)%s%b%u'::white::234
+)
 
 autoload -U colors && colors
 
