@@ -23,13 +23,18 @@ sep() {
   if [ "$last_bg" = "$bg" ]; then
     e " %F{white}${separator} "
   else
-    e " %F{${last_bg}}%K{${bg}}${separator} "
+    if [ "$direction" = right ]; then
+      e " %F{${bg}}%K{${last_bg}}${separator}%K{${bg}} "
+    else
+      e " %F{${last_bg}}%K{${bg}}${separator} "
+    fi
   fi
 }
 
 local idx=1
 local last_bg='black'
 local fg
+
 for seg in "${(@)segments}"; do
   local parts=( "${(@s.::.)seg}" )
   local name=${parts[1]}
@@ -37,6 +42,9 @@ for seg in "${(@)segments}"; do
   bg=${parts[3]}
 
   if (( idx == 1 )); then
+    if [ "$direction" = right ]; then
+      e " %F{${bg}}${separator}"
+    fi
     e "%F{${fg}}%K{${bg}}"
     e ' '
   else
@@ -54,7 +62,9 @@ for seg in "${(@)segments}"; do
   idx+=1
 done
 
-e " %F{${last_bg}}%k${separator}%f "
-e "%{$reset_color%}"
+if [ "$direction" != right ]; then
+  e " %F{${last_bg}}%k${separator}%f"
+fi
+e " %{$reset_color%}"
 
 # EOF
