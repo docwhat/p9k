@@ -1,0 +1,34 @@
+#!zsh
+
+## Turn on for Debugging
+#PS4='%s%f%b%k%F{blue}%{λ%}%L %F{240}%N:%i%(?.. %F{red}%?) %1(_.%F{yellow}%-1_ .)%s%f%b%k	'
+#zstyle ':vcs_info:*+*:*' debug true
+#set -o xtrace
+
+if [[ -n "$p9k_install_dir" ]]; then
+  p9k_directory=${p9k_install_dir:A}
+elif [[ "${(%):-%N}" == '(eval)' ]]; then
+  if [[ "$0" == '-antigen-load' ]] && [[ -r "${PWD}/powerlevel9k.zsh-theme" ]]; then
+    # Antigen uses eval to load things so it can change the plugin (!!)
+    # https://github.com/zsh-users/antigen/issues/581
+    p9k_install_dir=$PWD
+  else
+    print -P "%F{red}You must set POWERLEVEL9K_INSTALLATION_DIR work from within an (eval).%f"
+    return 1
+  fi
+else
+  # Get the path to file this code is executing in; then
+  # get the absolute path and strip the filename.
+  # See https://stackoverflow.com/a/28336473/108857
+  p9k_install_dir=${${(%):-%x}:A:h}
+fi
+
+fpath+="${p9k_install_dir}/functions"
+
+# Reload all functions
+for f in "$p9k_install_dir"/functions/*(.:t); do
+  unfunction "$f" 2>/dev/null
+  autoload -Uz "$f"
+done
+
+prompt_p9k_setup "$@"

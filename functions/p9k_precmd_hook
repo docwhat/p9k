@@ -1,0 +1,2 @@
+print -nP "%{$reset_color%}"
+p9k_pipe_status=( "$pipestatus[@]" )

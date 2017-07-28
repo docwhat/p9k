@@ -1,0 +1,4 @@
+add-zsh-hook -D precmd p9k_\*
+add-zsh-hook -D preexec p9k_\*
+PROMPT='%m%# '
+RPROMPT=

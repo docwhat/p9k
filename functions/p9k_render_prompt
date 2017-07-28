@@ -1,0 +1,55 @@
+
+e() {
+  print -n "$*"
+}
+
+local direction=$1; shift
+local -a segments=( "$@" )
+
+local separator
+case "$direction" in
+  left )
+    separator=''
+    ;;
+  right )
+    separator=''
+    ;;
+  *)
+    separator=' '
+    ;;
+esac
+
+sep() {
+  e " %F{${last_bg}}%K{${bg}}${separator} "
+}
+
+local idx=1
+local last_bg='black'
+local fg
+for seg in "${(@)segments}"; do
+  local parts=( "${(@s.::.)seg}" )
+  local name=${parts[1]}
+  local fg=${parts[2]}
+  bg=${parts[3]}
+
+  if (( idx == 1 )); then
+    e "%F{${fg}}%K{${bg}}"
+    e ' '
+  else
+    sep
+  fi
+
+  if (( $+functions[p9k_segment_${name}] )); then
+    "p9k_segment_${name}" "$fg" "$bg"
+  else
+    e "$name"
+  fi
+
+  last_bg=$bg
+  idx+=1
+done
+
+e " %F{${last_bg}}%k${separator}%f "
+e "%{$reset_color%}"
+
+# EOF
