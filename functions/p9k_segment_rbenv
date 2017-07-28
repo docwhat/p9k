@@ -1,0 +1,11 @@
+if (( $+functions[rbenv] )); then
+  local rbenv_version_name="$(rbenv version-name)"
+  local rbenv_global="$(rbenv global)"
+
+  # Don't show anything if the current Ruby is the same as the global Ruby.
+  if [[ $rbenv_version_name == $rbenv_global ]]; then
+    return
+  fi
+
+  e "$rbenv_version_name"
+fi
