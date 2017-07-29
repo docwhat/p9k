@@ -1,0 +1,132 @@
+#!zsh
+
+# Notes and Requirements
+# * Arguments MUST NOT have hyphens in them! We use this via the segments.
+# * Arguments MUST NOT have double-colors in them! We use this via the segments.
+
+function show_help {
+  print "Usage: $0 [fg|bg] [[no]bold] [[no]underline] [[no]italic] [<color>]"
+  print
+  print "Translates colors & attributes from a human readable scheme to"
+  print "terminal codes"
+  print
+  print "Arguments:"
+  print
+  print "  fg|bg     This a foreground or background color. (default: fg)"
+  print "  bold      Bold/bright the color (depends on your terminal) (fg only)."
+  print "  underline Turn on underline mode (fg only."
+  print "  italic    Turn on italics mode (not all terminals support this) (fg only."
+  print "  no-<attr> Turn off the matching attribute (fg only."
+  print
+  print "  <color>   Is one of the folowing formats"
+  print
+  print "  Terminals with 8 or more colors:"
+  print "  A color:"
+  print "    black"
+  print "    blue"
+  print "    cyan"
+  print "    default"
+  print "    green"
+  print "    grey"
+  print "    magenta"
+  print "    red"
+  print "    white"
+  print "    yellow"
+  print
+  print "  Terminals with 256 or more colors:"
+  print "    An integer from 0-255"
+  # TODO: More features!
+  # print "    A set of 3 integers from 0-63 separated by 'x'. e.g. 64x32x0"
+  # print
+  # print "  Terminals with truecolor (24bit) color support:"
+  # print "    CSS style hex number. e.g. #ddeeff or #fed"
+  # print "    rgb(x,y,z). e.g. rgb(255,100,0)"
+}
+
+local fgbg=38 # 38 is fg, 48 is bg
+local bold
+local underline
+local italic
+local seta
+local set24
+while (( $# > 0 )); do
+  case "$1" in
+    fg                     ) fgbg=38     ;;
+    bg                     ) fgbg=48     ;;
+
+    # Attributes
+    b|bold                 ) bold=t      ;;
+    nob|nobold             ) bold=f      ;;
+    u|underline            ) underline=t ;;
+    nou|nounderline        ) underline=f ;;
+    i|italic|italics       ) italic=t    ;;
+    noi|noitalic|noitalics ) italic=f    ;;
+
+    # Names
+    black                  ) seta=0      ;;
+    red                    ) seta=1      ;;
+    green                  ) seta=2      ;;
+    yellow                 ) seta=3      ;;
+    blue                   ) seta=4      ;;
+    magenta                ) seta=5      ;;
+    cyan                   ) seta=6      ;;
+    white                  ) seta=7      ;;
+
+    # 8bit color
+    [0-9]                  ) seta=$1     ;;
+    [0-9][0-9]             ) seta=$1     ;;
+    [0-9][0-9][0-9]        ) seta=$1     ;;
+
+    # # 8bit color 0x0x0 format
+    # *x*x* ) seta="$(xformat "$1")" ;;
+
+    # # Truecolor CSS style
+    # \#[a-f0-9][a-f0-9][a-f0-9] ) set24="$(hex3format "$1")" ;;
+    # \#[a-f0-9][a-f0-9][a-f0-9][a-f0-9][a-f0-9][a-f0-9] ) set24="$(hex6format "$1")" ;;
+
+    -h|--help)
+      show_help
+      return
+      ;;
+    *)
+      echo "error in $0: I don't understand '$1'" 1>&2
+      show_help
+      return 1
+      ;;
+  esac
+  shift
+done
+
+print -n '%{'
+
+if [ "$fgbg" = 38 ]; then
+  if [ "$bold" = t ]; then
+    tput bold
+  elif [ "$bold" = f ]; then
+    tput sgr0
+  fi
+
+  if [ "$underline" = t ]; then
+    tput smul
+  elif [ "$underline" = f ]; then
+    tput rmul
+  fi
+
+  if [ "$italic" = t ]; then
+    tput sitm
+  elif [ "$italic" = f ]; then
+    tput ritm
+  fi
+fi
+
+if [ -n "$seta" ]; then
+  if [ "$fgbg" = 38 ]; then # foreground
+    tput setaf "$seta"
+  else
+    tput setab "$seta"
+  fi
+fi
+
+print -n '%}'
+
+# EOF

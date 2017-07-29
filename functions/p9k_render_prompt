@@ -1,3 +1,4 @@
+#!zsh
 
 e() {
   print -n "$*"
@@ -24,54 +25,70 @@ sep() {
     e " %F{white}${separator} "
   else
     if [ "$direction" = right ]; then
-      e " %F{${bg}}%K{${last_bg}}${separator}%K{${bg}} "
+      e " ${bg_as_fg}${last_bg}${separator}${bg} "
     else
-      e " %F{${last_bg}}%K{${bg}}${separator} "
+      e " ${last_bg_as_fg}${bg}${separator} "
     fi
   fi
 }
 
-local idx=1
-local last_bg='black'
-local fg
+local -a default_fgs=( bold-white yellow bold-yellow )
+local -a default_bgs=( blue black )
 
+local rst="%{${reset_color}%}"
+local idx=0
+local last_bg='black'
+local bg=''
+local bg_as_fg=''
+local last_bg_as_fg=''
+
+e "$rst"
 for seg in "${(@)segments}"; do
+  local default_fg=${default_fgs[$(( (idx % $#default_fgs) + 1 ))]}
+  local default_bg=${default_bgs[$(( (idx % $#default_bgs) + 1 ))]}
   local parts=( "${(@s.::.)seg}" )
   local name=${parts[1]}
-  local fg=${parts[2]}
-  bg=${parts[3]}
-  # local content
+  local fg=${parts[2]:-$default_fg}
+  bg=${parts[3]:-$default_bg}
+  local content="$name"
 
+  # Look up the color codes
+  bg_as_fg="$(p9k_color fg "$bg")"
+  bg="$(p9k_color bg "$bg")"
+  fg="$(p9k_color fg "${(@s.-.)fg}")"
+
+  # Get the segment contents
   if (( $+functions[p9k_segment_${name}] )); then
-    content="$("p9k_segment_${name}" "$fg" "$bg")"
-  else
-    content=$name
+    content="$("p9k_segment_${name}")"
   fi
 
+  # No contents? Then we're done.
   if [ -z "$content" ]; then
     continue
   fi
 
-  if (( idx == 1 )); then
+  if (( idx == 0 )); then
     if [ "$direction" = right ]; then
-      e " %F{${bg}}${separator}"
+      e " ${bg_as_fg}${separator}"
     fi
-    e "%F{${fg}}%K{${bg}}"
+    e "$bg"
     e ' '
   else
     sep
-    e "%F{${fg}}%K{${bg}}"
+    e "$bg"
   fi
 
-  e "$content"
+  e "${fg}$content${rst}${bg}"
 
   last_bg=$bg
-  idx+=1
+  last_bg_as_fg=$bg_as_fg
+  idx=$(( idx + 1 ))
 done
 
-if [ "$direction" != right ]; then
-  e " %F{${last_bg}}%k${separator}%f"
+if [ "$direction" = right ]; then
+  e "$rst"
+else
+  e " ${rst}${last_bg_as_fg}${separator}${rst} "
 fi
-e " %{$reset_color%}"
 
 # EOF

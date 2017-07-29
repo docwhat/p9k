@@ -1,4 +1,34 @@
+#!zsh
 # This MUST go first
-p9k_pipe_status=( "$pipestatus[@]" )
+typeset -g -a p9k_pipe_status=( "$pipestatus[@]" )
 
-print -nP "%{$reset_color%}"
+print -n "$reset_color"
+
+typeset -g -a p9k_left_segments
+typeset -g -a p9k_right_segments
+typeset -g -a p9k_xtrace_segments
+
+## Default/Demo
+if (( ${(@)#p9k_left_segments} == 0 )); then
+  p9k_left_segments=(
+  dir::red::black
+  status::yellow::red
+  rbenv::red::yellow
+  '%m%#'::bold-white::blue
+  )
+fi
+if (( $#p9k_right_segments == 0 )); then
+  p9k_right_segments=(
+  '%y'::blue::white
+  '%h'::white::blue
+  )
+fi
+if (( $#p9k_xtrace_segments == 0 )); then
+  p9k_xtrace_segments=(
+  '%{λ%G%}%L'::blue::236
+  '%N:%i'::008::235
+  '%(?.. %F{red}%?) %1(_.%F{yellow}%-1_ .)'::white::234
+  )
+fi
+
+# EOF

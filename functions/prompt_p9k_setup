@@ -1,34 +1,8 @@
 #!zsh
 
-typeset -g -a p9k_last_pipe_status
-typeset -g -a p9k_left_segments
-typeset -g -a p9k_right_segments
-typeset -g -a p9k_xtrace_segments
-
-## Default/Demo
-if (( $#p9k_left_segments == 0 )); then
-  p9k_left_segments=(
-  dir::red::black
-  status::yellow::red
-  rbenv::red::yellow
-  '%m%#'::white::blue
-  )
-fi
-if (( $#p9k_right_segments == 0 )); then
-  p9k_right_segments=(
-  '%y'::blue::white
-  '%h'::white::blue
-  )
-fi
-if (( $#p9k_xtrace_segments == 0 )); then
-  p9k_xtrace_segments=(
-  '%s%b%u%{λ%}%L'::blue::236
-  '%N:%i'::008::235
-  '%(?.. %F{red}%?) %1(_.%F{yellow}%-1_ .)%s%b%u'::white::234
-  )
-fi
-
 autoload -U colors && colors
+
+typeset -g -a p9k_last_pipe_status
 
 add-zsh-hook precmd p9k_precmd_hook
 
